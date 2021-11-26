@@ -5,7 +5,7 @@ with open('README.md', 'r') as fin:
     long_description = fin.read()
 
 setuptools.setup(
-    name='altool',
+    name='agtool',
     version='0.0.1',
     author='swyo',
     author_email='l22491360@gmail.com',
