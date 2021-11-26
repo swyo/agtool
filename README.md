@@ -32,7 +32,7 @@ python -m twine upload dist/*.whl
 
 Update documentation using sphinx.
 ```
-sphinx-apidoc -f -o docs altools
+sphinx-apidoc -f -o docs agtool
 ```
 
 Serving the documetation.
