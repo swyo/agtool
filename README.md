@@ -2,7 +2,7 @@
 
 This library serves useful algorithm tools for python. 😄 <br>
 
-Anyone can be install this library from pypi from this link: https://pypi.org/project/mipack/
+Anyone can be install this library from pypi from this link: https://pypi.org/project/agtool/
 
 ```
 pip install agtool
