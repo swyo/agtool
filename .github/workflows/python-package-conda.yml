@@ -33,5 +33,5 @@ jobs:
       run: |
         conda install pytest
         python setup.py install
-        python setup.py build_ext
+        python setup.py build_ext -i
         python -m pytest test
