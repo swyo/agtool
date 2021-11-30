@@ -31,5 +31,6 @@ jobs:
     - name: Test with pytest
       run: |
         conda install pytest
+        pip intall -r requirements.txt
         python setup.py install
         python -m pytest test
