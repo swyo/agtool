@@ -2,6 +2,7 @@ import numpy as np
 
 from numba import njit
 
+
 @njit
 def negative_sampling(indptr, indices, n_negatives, n_items):
     """Negative sampling.

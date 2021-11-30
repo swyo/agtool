@@ -38,7 +38,7 @@ class TestNegativeSampling(unittest.TestCase):
             uids, negatives = negative_sampling(
                 indptr, indices, 5, num_items, num_threads
             )
-            print(f"[negative_sampling] takes {time.time() - start:.6f} seconds for [{num_threads}] threads");
+            print(f"[negative_sampling] takes {time.time() - start:.6f} seconds for [{num_threads}] threads")
         print("10 samples: ", uids[:10])
         print("10 negatives: ", negatives[:10])
         negative_matrix = csr_matrix((np.ones_like(uids), (uids, negatives)), shape=(len(indptr) - 1, num_items))
@@ -47,7 +47,7 @@ class TestNegativeSampling(unittest.TestCase):
             negatives = negative_matrix[i].nonzero()[1]
             intersect = np.intersect1d(positives, negatives)
             is_empty = intersect.size == 0
-            msg=f"Negative sampling [Invalid] intersect[user {i}]: {intersect.tolist()}"
+            msg = f"Negative sampling [Invalid] intersect[user {i}]: {intersect.tolist()}"
             self.assertTrue(is_empty, msg=msg)
 
     def test02_speed_experiments(self):
@@ -59,4 +59,4 @@ class TestNegativeSampling(unittest.TestCase):
             set_num_threads(num_threads)
             start = time.time()
             numba_negative_sampling(indptr, indices, 5, num_items)
-            print(f"[numba_negative_sampling] takes {time.time() - start:.6f} seconds for [{num_threads}] threads");
+            print(f"[numba_negative_sampling] takes {time.time() - start:.6f} seconds for [{num_threads}] threads")
