@@ -20,14 +20,3 @@ def negative_sampling(
     ret = _negative_sampling(indptr, indices, num_negatives, num_items, num_threads)
     assert isinstance(ret, Tuple)
     return ret
-
-# def test_negative_sampling():
-#     load_dataset()
-#     indptr = pd.read_csv('ml-100k/processed/indptr', header=None).to_numpy().squeeze().astype(np.int32)
-#     indices = pd.read_csv('ml-100k/processed/indices', header=None).to_numpy().squeeze().astype(np.int32)
-#     num_items = max(indices) + 1
-#     print("num_items: ", num_items)
-#     for num_threads in range(1, 7):
-#         uids, negatives = cython_negative_sampling(indptr, indices, 5, num_items, num_threads)
-#     print("10 samples: ", uids[:10])
-#     print("10 negatives: ", negatives[:10])

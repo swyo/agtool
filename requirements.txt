@@ -1,5 +1,7 @@
-cython
 numba
+numpy
+cython
+pandas
 ipython
 sphinx
 sphinx-autobuild

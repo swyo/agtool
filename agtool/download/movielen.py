@@ -1,8 +1,8 @@
 import shutil
 import subprocess
-from os import mkdir
-from os.path import exists
+from os import makedirs
 from os.path import join as pjoin
+from os.path import exists, dirname
 
 import pandas as pd
 from scipy.sparse import csr_matrix
@@ -10,22 +10,22 @@ from scipy.sparse import csr_matrix
 from agtool.utils.path_utils import module_path
 
 
-DIR_BASE = module_path('download')
+DIR_BASE = pjoin(dirname(module_path()), 'dataset')
 
 
 def ml_100k():
     data = 'ml-100k'
     URL_MOVIELENS = 'http://files.grouplens.org/datasets/movielens'
     DIR = pjoin(DIR_BASE, data)
+    makedirs(DIR, exist_ok=True)
+    makedirs(pjoin(DIR, 'processed'), exist_ok=True)
     data = 'ml-100k'
-    if not exists(DIR):
+    if not exists(pjoin(DIR, 'u.data')):
         url = pjoin(URL_MOVIELENS, f'{data}.zip')
         subprocess.run(
             f"wget -O tmp.zip {url} && unzip tmp.zip && rm tmp.zip",
             cwd=DIR_BASE, shell=True, check=True
         )
-    if not exists(pjoin(DIR, 'processed')):
-        mkdir(pjoin(DIR, 'processed'))
     elif exists(pjoin(DIR, 'processed', 'indptr')) and \
             exists(pjoin(DIR, 'processed', 'indices')):
         print("Already processed ml-100k.")

@@ -1967,7 +1967,6 @@ static PyObject *__pyx_pf_6agtool_2cm_8sampling_negative_sampling(CYTHON_UNUSED 
  *     ret = _negative_sampling(indptr, indices, num_negatives, num_items, num_threads)
  *     assert isinstance(ret, Tuple)             # <<<<<<<<<<<<<<
  *     return ret
- * 
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(!Py_OptimizeFlag)) {
@@ -1989,8 +1988,6 @@ static PyObject *__pyx_pf_6agtool_2cm_8sampling_negative_sampling(CYTHON_UNUSED 
  *     ret = _negative_sampling(indptr, indices, num_negatives, num_items, num_threads)
  *     assert isinstance(ret, Tuple)
  *     return ret             # <<<<<<<<<<<<<<
- * 
- * # def test_negative_sampling():
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_5 = __pyx_convert_pair_to_py_std_3a__3a_vector_3c_int_3e_______std_3a__3a_vector_3c_int_3e___(__pyx_v_ret); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 22, __pyx_L1_error)
