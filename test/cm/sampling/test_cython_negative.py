@@ -1,6 +1,7 @@
 import time
 import shutil
 import unittest
+from os import cpu_count
 
 import numpy as np
 import pandas as pd
@@ -33,7 +34,7 @@ class TestNegativeSampling(unittest.TestCase):
     def test01_negative_sampling(self):
         indptr, indices, num_items = self._load_data()
         print("num_items: ", num_items)
-        for num_threads in range(1, 7):
+        for num_threads in range(1, min(7, cpu_count())):
             start = time.time()
             uids, negatives = negative_sampling(
                 indptr, indices, 5, num_items, num_threads
@@ -55,7 +56,7 @@ class TestNegativeSampling(unittest.TestCase):
         start = time.time()
         numba_negative_sampling(indptr, indices, 5, num_items)
         print(f"[numba_negative_sampling] build time takes {time.time() - start:.6f} seconds")
-        for num_threads in range(1, 7):
+        for num_threads in range(1, min(cpu_count(), 7)):
             set_num_threads(num_threads)
             start = time.time()
             numba_negative_sampling(indptr, indices, 5, num_items)
