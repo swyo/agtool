@@ -8,8 +8,8 @@ import pandas as pd
 from numba import set_num_threads
 from scipy.sparse import csr_matrix
 
-from agtool.download.movielen import ml_10m
-# from agtool.download.movielen import ml_100k
+# from agtool.download.movielen import ml_10m
+from agtool.download.movielen import ml_100k
 from agtool.cm.sampling import negative_sampling
 from agtool.sampling import negative_sampling as numba_negative_sampling
 
@@ -17,8 +17,8 @@ from agtool.sampling import negative_sampling as numba_negative_sampling
 class TestNegativeSampling(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # cls.DIR = ml_100k()
-        cls.DIR = ml_10m()
+        # cls.DIR = ml_10m()
+        cls.DIR = ml_100k()
 
     @classmethod
     def tearDownClass(cls):
