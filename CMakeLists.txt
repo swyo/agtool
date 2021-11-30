@@ -27,6 +27,8 @@ install(
 )
 
 # generate excutable file.
-# python -c ""
+# ipython
+# >>> from agtool.downlaod import ml_100k
+# >>> ml_100k()
 add_executable(TestNegative test/cpp/test_negative.cpp)
 target_link_libraries(TestNegative cpp_agtool)
