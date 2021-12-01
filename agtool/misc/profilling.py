@@ -6,6 +6,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 import psutil
 
+from agtool.misc.log import get_logger
+
+logger = get_logger('profilling', 'INFO', propagate=False)
+
 
 def timeit(original_fn, *args, number=1, verbose=True, name=None, fix_unit=False, **kwargs):
     """Profiling elapsed time.
@@ -39,14 +43,14 @@ def timeit(original_fn, *args, number=1, verbose=True, name=None, fix_unit=False
             nominator = float(1000 ** 3)
         elapsed *= nominator
     if verbose:
-        print(f"[{name}] takes {elapsed:.6f} [{unit}]")
+        logger.info(f"[{name}] takes {elapsed:.6f} [{unit}]")
     return elapsed
 
 
 def available_memory(verbose=True):
     available = psutil.virtual_memory().available / (1024 ** 3)
     if verbose:
-        print(f"available physical memory: {available} [GB]")
+        logger.info(f"available physical memory: {available} [GB]")
     return available
 
 
@@ -69,7 +73,7 @@ def memit(original_fn, *args, interval=1e-6, verbose=True, return_func=False, na
     """
     name = original_fn.__name__ if name is None else name
     if not exists('/etc/os-release'):
-        print("Get peak memory for only linux system.")
+        logger.info("Get peak memory for only linux system.")
         return
     result = None
     start_usage = psutil.virtual_memory().used
@@ -98,7 +102,7 @@ def memit(original_fn, *args, interval=1e-6, verbose=True, return_func=False, na
                 peak_memory /= float(1024 ** 3)
                 increment /= denominator
     if verbose:
-        print(f"[{name}] peak memory: {peak_memory:.4f} [GiB], increment: {increment:.4f} [{unit}]")
+        logger.info(f"[{name}] peak memory: {peak_memory:.4f} [GiB], increment: {increment:.4f} [{unit}]")
     if return_func:
         return peak_memory, increment, result
     return peak_memory, increment

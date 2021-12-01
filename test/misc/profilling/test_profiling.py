@@ -1,6 +1,6 @@
 import unittest
 
-from agtool.misc.profile import available_memory, timeit, memit
+from agtool.misc.profilling import available_memory, timeit, memit
 
 
 def _func(N):
