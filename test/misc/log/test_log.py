@@ -3,12 +3,14 @@ import unittest
 
 from agtool.misc.log import get_logger, disable
 
+
 def _funcA(sub=None):
     num = random.randint(1, 10)
     loggerA = get_logger(f'_funcA-{num}', 'DEBUG')
     loggerA.debug(f'This is DEBUG[{num}]')
     if sub:
         sub()
+
 
 def _funcB(sub=None):
     num = random.randint(1, 10)
@@ -17,12 +19,14 @@ def _funcB(sub=None):
     if sub:
         sub()
 
+
 def _funcC(sub=None):
     num = random.randint(1, 10)
     loggerC = get_logger(f'_funcC-{num}', 'WARN')
     loggerC.warning(f'This is WARN message[{num}]')
     if sub:
         sub()
+
 
 class TestLog(unittest.TestCase):
 

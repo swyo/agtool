@@ -1,7 +1,13 @@
 # cache
 __pycache__
+.DS_Store
 
 # package
 dist
 build
 *.egg-info
+*.so
+cython_*.cpp
+
+# saved models
+*.pt
