@@ -8,7 +8,8 @@ psutil
 cython
 pandas
 ipython
-torchvision
 sphinx
+matplotlib
+torchvision
 sphinx-autobuild
 sphinx_rtd_theme
