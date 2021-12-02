@@ -1,3 +1,5 @@
+fire
+tqdm
 numba
 numpy
 scipy
@@ -6,6 +8,7 @@ psutil
 cython
 pandas
 ipython
+torchvision
 sphinx
 sphinx-autobuild
 sphinx_rtd_theme

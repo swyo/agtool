@@ -1,7 +1,9 @@
 import torch
 
+from agtool.models import PytorchModelBase
 
-class DeepAutoEncoder(torch.nn.Module):
+
+class DeepAutoEncoder(PytorchModelBase):
     def __init__(self):
         super().__init__()
         self.encoder = torch.nn.Sequential(
