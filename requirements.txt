@@ -1,6 +1,7 @@
 numba
 numpy
 scipy
+torch
 psutil
 cython
 pandas
