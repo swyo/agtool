@@ -64,3 +64,22 @@ pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f 
 ```
 
 If you want to use `torch-sparse, torch-cluster, torch-scatter, torch-spline-curve`, find proper version from this [website](https://data.pyg.org/whl/).
+E.g., I will use pip install as follows. This is [official website guide](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
+```
+pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.10.0+cu113.html
+```
+
+If torch_geometric does not find cuda toolkit, export `LD_LIBRARY_PATH` as follows. Refer this [git issue](https://github.com/tensorflow/tensorflow/issues/45930#issuecomment-770342299).
+
+Find cuda library: `find / -name 'libcudart.so.[VERSION]'`
+```
+# E.g., 
+find / -name 'libcudart.so.11.0'
+```
+
+And then, export proper location as follows: `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/anaconda3/envs/[ANANCONDA ENV NAME]/lib`
+```
+# E.g.,
+# ~/.bashrc
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/anaconda3/envs/pyg/lib
+```
