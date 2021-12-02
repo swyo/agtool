@@ -1,6 +1,6 @@
 from .model import DeepAutoEncoder
 from .loader import get_loader
-from .train import train
+from .analysis import analysis_train, analysis_test
 
 
-__all__ = ['DeepAutoEncoder', 'get_loader', 'train']
+__all__ = ['DeepAutoEncoder', 'get_loader', 'analysis_train', 'analysis_test']

@@ -2,7 +2,7 @@ import pickle
 import matplotlib.pyplot as plt
 
 
-def check_train_result(outputs):
+def analysis_train(outputs, out_fname='analysis_train.png'):
     counter = 1
     # Plotting reconstructions
     # for epochs = [1, 5, 10, 50, 100]
@@ -36,12 +36,12 @@ def check_train_result(outputs):
         counter += 1
     plt.tight_layout()
     plt.show()
-    plt.savefig('./train_result.png')
+    plt.savefig(out_fname)
     plt.cla()
     plt.clf()
 
 
-def check_test_result(model, test_loader):
+def analysis_test(model, test_loader, out_fname='analysis_test.png'):
     plt.rc('font', size=4)
     # Dictionary that will store the different
     # images and outputs for various epochs
@@ -81,18 +81,6 @@ def check_test_result(model, test_loader):
         counter += 1
     plt.tight_layout()
     plt.show()
-    plt.savefig('./test_result.png')
+    plt.savefig(out_fname)
     plt.cla()
     plt.clf()
-
-
-if __name__ == '__main__':
-    from model import DeepAutoEncoder
-    from loader import get_loader
-    _, test_loader = get_loader()
-    with open('./outputs', 'rb') as fin:
-        outputs = pickle.load(fin)
-    model = DeepAutoEncoder()
-    model.from_pretrained('./vanilla_ae.pt')
-    check_train_result(outputs)
-    check_test_result(model, test_loader)
