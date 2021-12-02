@@ -8,12 +8,6 @@ type_loader = torch.utils.data.dataloader.DataLoader
 
 
 def get_loader(batch_size=256) -> Tuple[type_loader, type_loader]:
-    # Initializing the transform for the dataset
-    transform = torchvision.transforms.Compose([
-        torchvision.transforms.ToTensor(),
-        torchvision.transforms.Normalize((0.5), (0.5))
-    ])
-
     # Downloading the MNIST dataset
     train_dataset = torchvision.datasets.MNIST(
         root="./MNIST/train", train=True,

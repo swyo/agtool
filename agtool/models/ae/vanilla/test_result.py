@@ -17,10 +17,10 @@ def check_train_result(outputs):
         for idx in range(5):
             plt.subplot(7, 5, counter)
             plt.title(title_text)
-            plt.imshow(temp[idx].reshape(28,28), cmap= 'gray')
+            plt.imshow(temp[idx].reshape(28, 28), cmap='gray')
             plt.axis('off')
             # Incrementing the subplot counter
-            counter+=1
+            counter += 1
     # Plotting original images
     # Iterating over first five
     # images of the last batch
@@ -28,12 +28,12 @@ def check_train_result(outputs):
         # Obtaining image from the dictionary
         val = outputs[10]['img']
         # Plotting image
-        plt.subplot(7,5,counter)
-        plt.imshow(val[idx].reshape(28, 28), cmap = 'gray')
+        plt.subplot(7, 5, counter)
+        plt.imshow(val[idx].reshape(28, 28), cmap='gray')
         plt.title("Original Image")
         plt.axis('off')
         # Incrementing subplot counter
-        counter+=1
+        counter += 1
     plt.tight_layout()
     plt.show()
     plt.savefig('./train_result.png')
