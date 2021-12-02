@@ -14,3 +14,9 @@ class TestAE(unittest.TestCase):
     def test03_analysis(self):
         model = DeepAutoEncoder()
         model.analysis()
+
+    def test04_classifier(self):
+        model = DeepAutoEncoder()
+        model.fit_classifier(epochs=10)
+        model.test_classifier()
+

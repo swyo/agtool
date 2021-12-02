@@ -15,8 +15,9 @@ Q. How to manage packages? see from <a href="https://www.youtube.com/watch?v=Mot
 
 This check lists will be implemented soon. 🔥
 
-- [ ] negative sampling: draw negative samples from rating matrix.
-
+- [ ] vanilla vae.
+- [ ] plsi, lda model.
+- [ ] vanilla gcn.
 
 ## Deploy
 
