@@ -1,12 +1,12 @@
 from os import makedirs
 from os.path import exists
 
-
 import torch
 from tqdm import tqdm
 
 from agtool.misc import get_logger
 from agtool.models import PytorchModelBase
+from agtool.misc.profilling import timeit, memit
 
 
 class DeepAutoEncoder(PytorchModelBase):
@@ -44,7 +44,7 @@ class DeepAutoEncoder(PytorchModelBase):
         decoded = self.decoder(encoded)
         return decoded
 
-    def fit(self, epochs=100, lr=1e-3, batch_size=256):
+    def fit(self, epochs=100, lr=1e-3, batch_size=256, num_workers=0, device='cuda'):
         import pickle
         import matplotlib.pyplot as plt
 
@@ -53,7 +53,11 @@ class DeepAutoEncoder(PytorchModelBase):
         makedirs('./results', exist_ok=True)
         criterion = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(self.parameters(), lr=lr)
-        train_loader, _ = get_loader(batch_size)
+        train_loader, _ = get_loader(batch_size, num_workers=num_workers)
+        device = torch.device(device if torch.cuda.is_available() else "cpu")
+        if 'cuda' == device.type:
+            self.logger.info('Cuda is used')
+        self.to(device)
         train_loss = []
         # Dictionary that will store the different images and outputs for various epochs
         outputs = {}
@@ -63,7 +67,7 @@ class DeepAutoEncoder(PytorchModelBase):
             running_loss = 0
             for (img, _) in train_loader:
                 # reshaping it into a 1-d vector
-                img = img.reshape(-1, 28 * 28)
+                img = img.reshape(-1, 28 * 28).to(device)
                 out = self(img)
                 loss = criterion(out, img)
                 optimizer.zero_grad()
@@ -75,7 +79,8 @@ class DeepAutoEncoder(PytorchModelBase):
             running_loss /= batch_size
             train_loss.append(running_loss)
             # Storing useful images and reconstructed outputs for the last batch
-            outputs[epoch + 1] = {'img': img, 'out': out}
+            outputs[epoch + 1] = {'img': img.to('cpu'), 'out': out.to('cpu')}
+        self.to('cpu')
         self.save('./results/vanilla_ae.pt')
         with open('./results/outputs', 'wb') as fout:
             pickle.dump(outputs, fout)
@@ -103,7 +108,7 @@ class DeepAutoEncoder(PytorchModelBase):
         analysis_train(outputs, './results/analysis_train.png')
         analysis_test(self, test_loader, './results/analysis_test.png')
 
-    def fit_classifier(self, epochs=100, lr=1e-3, batch_size=256):
+    def fit_classifier(self, epochs=100, lr=1e-3, batch_size=256, num_workers=0, device='cuda'):
         from agtool.models.ae.vanilla.loader import get_loader
 
         if not exists('./results/vanilla_ae.pt'):
@@ -112,7 +117,11 @@ class DeepAutoEncoder(PytorchModelBase):
         self.from_pretrained('./results/vanilla_ae.pt')
         optimizer = torch.optim.Adam(self.clf.parameters(), lr=lr)
         criterion = torch.nn.CrossEntropyLoss()
-        train_loader, _ = get_loader(batch_size)
+        train_loader, _ = get_loader(batch_size, num_workers=num_workers)
+        device = torch.device(device if torch.cuda.is_available() else 'cpu')
+        if 'cuda' == device.type:
+            self.logger.info('Cuda is used')
+        self.to(device)
         self.encoder.eval()
         self.decoder.eval()
         self.clf.train()
@@ -120,7 +129,8 @@ class DeepAutoEncoder(PytorchModelBase):
         for epoch in pbar:
             hit = total = 0
             for (img, label) in train_loader:
-                img = img.reshape(-1, 28 * 28)
+                label = label.to(device)
+                img = img.reshape(-1, 28 * 28).to(device)
                 out = self(img)
                 logit = self.clf(out)
                 loss = criterion(logit, label)
@@ -133,18 +143,23 @@ class DeepAutoEncoder(PytorchModelBase):
             pbar.set_postfix({'Accurcay[%]': acc.item()})
         self.save('./results/vanilla_ae.pt')
 
-    def test_classifier(self, batch_size=256):
+    def test_classifier(self, batch_size=256, num_workers=0, device='cuda'):
         from agtool.models.ae.vanilla.loader import get_loader
 
         if not exists('./results/vanilla_ae.pt'):
             self.logger.info('Please fit(train) model before run analysis.')
             return
         self.from_pretrained('./results/vanilla_ae.pt')
+        device = torch.device(device if torch.cuda.is_available() else 'cpu')
+        if 'cuda' == device.type:
+            self.logger.info('Cuda is used')
+        self.to(device)
         self.eval()
-        _, test_loader = get_loader(batch_size)
+        _, test_loader = get_loader(batch_size, num_workers=num_workers)
         hit = total = 0
         for (img, label) in tqdm(test_loader, 'Test Classifier'):
-            img = img.reshape(-1, 28 * 28)
+            label = label.to(device)
+            img = img.reshape(-1, 28 * 28).to(device)
             out = self(img)
             hit += (label == self.clf(out).argmax(-1)).sum()
             total += len(label)
@@ -152,10 +167,17 @@ class DeepAutoEncoder(PytorchModelBase):
         self.logger.info(f"Accuracy: {acc:.4f} [%]")
 
 
-if __name__ == '__main__':
+def run(epochs=10, device='cpu', num_workers=0):
+    assert device in ['cpu', 'cuda']
     model = DeepAutoEncoder()
     print(model)
-    model.fit(epochs=10)
+    kwargs = {'epochs': epochs, 'device': device, 'num_workers': num_workers}
+    memit(model.fit, **kwargs)
     model.analysis()
-    model.fit_classifier(epochs=10)
-    model.test_classifier()
+    timeit(model.fit_classifier, **kwargs)
+    model.test_classifier(device=device)
+
+
+if __name__ == '__main__':
+    from fire import Fire
+    Fire(run)

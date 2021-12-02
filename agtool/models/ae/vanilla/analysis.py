@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 def analysis_train(outputs, out_fname='analysis_train.png'):
     counter = 1
     # Plotting reconstructions
-    # for epochs = [1, 5, 10, 50, 100]
-    epochs_list = [1, 5, 10]
-    # epochs_list = [1, 5, 10, 50, 100]
+    epochs_list = [1, 5, 10, 50, 100]
     # Iterating over specified epochs
     for val in epochs_list:
+        if val not in outputs:
+            break
         # Extracting recorded information
         temp = outputs[val]['out'].detach().numpy()
         title_text = f"Epoch = {val}"
@@ -20,6 +20,7 @@ def analysis_train(outputs, out_fname='analysis_train.png'):
             plt.axis('off')
             # Incrementing the subplot counter
             counter += 1
+    assert len(outputs) >= 10, "Please Train epochs >= 10"
     # Plotting original images
     # Iterating over first five
     # images of the last batch

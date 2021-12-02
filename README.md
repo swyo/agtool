@@ -42,7 +42,7 @@ Serving the documetation.
 sphinx-autobuild --host [IP] --port [PORT] docs docs/_build/html
 ```
 
-## unittest
+## Unittest
 
 Install by source build and run pytest.
 ```
@@ -51,4 +51,14 @@ pip install -r requirements.txt
 python setup.py install
 conda install pytest
 python -m pytest test
+```
+
+## Use GPU
+
+If you want to run model with cuda, please install torch as follows by refering [this article](https://pytorch.org/get-started/previous-versions/#commands-for-versions--100).
+
+E.g., Find proper version from this [website](https://download.pytorch.org/whl/torch_stable.html).
+```
+pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
 ```

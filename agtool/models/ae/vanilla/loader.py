@@ -7,7 +7,7 @@ import torchvision
 type_loader = torch.utils.data.dataloader.DataLoader
 
 
-def get_loader(batch_size=256) -> Tuple[type_loader, type_loader]:
+def get_loader(batch_size=256, num_workers=0) -> Tuple[type_loader, type_loader]:
     # Downloading the MNIST dataset
     train_dataset = torchvision.datasets.MNIST(
         root="./MNIST/train", train=True,
@@ -22,10 +22,10 @@ def get_loader(batch_size=256) -> Tuple[type_loader, type_loader]:
     # Creating Dataloaders from the
     # training and testing dataset
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=batch_size
+        train_dataset, batch_size=batch_size, num_workers=num_workers
     )
     test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=batch_size
+        test_dataset, batch_size=batch_size, num_workers=num_workers
     )
     return train_loader, test_loader
 
