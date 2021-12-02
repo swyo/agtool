@@ -95,7 +95,7 @@ class DeepAutoEncoder(PytorchModelBase):
             outputs = pickle.load(fin)
         self.from_pretrained('./results/vanilla_ae.pt')
         analysis_train(outputs, './results/analysis_train.png')
-        analysis_test(model, test_loader, './results/analysis_test.png')
+        analysis_test(self, test_loader, './results/analysis_test.png')
 
 if __name__ == '__main__':
     model = DeepAutoEncoder()

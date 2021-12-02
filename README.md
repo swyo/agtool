@@ -40,3 +40,14 @@ Serving the documetation.
 ```
 sphinx-autobuild --host [IP] --port [PORT] docs docs/_build/html
 ```
+
+## unittest
+
+Install by source build and run pytest.
+```
+conda env update --file environment.yml --name [ANACONDA ENV NAME]
+pip install -r requirements.txt
+python setup.py install
+conda install pytest
+python -m pytest test
+```
