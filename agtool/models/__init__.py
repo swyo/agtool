@@ -1,7 +1,7 @@
-from . import ae, vae
+from . import ae, vae, gnn
 
 
-__all__ = ['ae', 'vae']
+__all__ = ['ae', 'vae', 'gnn']
 
 
 ######################################################
