@@ -9,6 +9,10 @@ import numpy as np
 with open('README.md', 'r') as fin:
     long_description = fin.read()
 
+install_requires = [
+    'torch'
+]
+
 ext = [
     Extension(
         "agtool.cm.sampling",
