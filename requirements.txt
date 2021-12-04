@@ -8,12 +8,13 @@ cython
 pandas
 ipython
 matplotlib
-torch
-torchvision
-torch-sparse
-torch-scatter
-torch-cluster
-torch-geometric
+torch==1.10.0
+torchvision==0.11.1
+torchaudio==0.10.0
+torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+torch-scatter -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+torch-cluster -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+torch-geometric -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
 sphinx
 sphinx-autobuild
 sphinx_rtd_theme
