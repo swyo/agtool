@@ -36,7 +36,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/swyo/agtool',
-    install_requires=[],
+    install_requires=install_requires,
     keywords=['python', 'packaging'],
     python_requires='>=3.9',
     packages=find_packages('.', exclude=('docs', 'tests')),
