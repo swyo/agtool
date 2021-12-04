@@ -10,7 +10,9 @@ with open('README.md', 'r') as fin:
     long_description = fin.read()
 
 install_requires = [
-    'torch'
+    'numpy',
+    'torch',
+    'cython'
 ]
 
 ext = [
