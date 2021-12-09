@@ -9,6 +9,12 @@ import numpy as np
 with open('README.md', 'r') as fin:
     long_description = fin.read()
 
+install_requires = [
+    'cython',
+    'numpy',
+    'torch>=1.10.0'
+]
+
 ext = [
     Extension(
         "agtool.cm.sampling",
@@ -32,7 +38,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/swyo/agtool',
-    install_requires=[],
+    install_requires=install_requires,
     keywords=['python', 'packaging'],
     python_requires='>=3.9',
     packages=find_packages('.', exclude=('docs', 'tests')),
