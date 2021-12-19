@@ -14,7 +14,7 @@ device = 'cpu'
 first = True
 
 
-def _get_sampler(batch_size, supervised, num_negatives, num_workers, dataset):
+def _get_sampler(batch_size, supervised, num_negatives, num_workers, dataset, cache=False):
     global first
     assert dataset in ['Cora', 'Reddit', 'CiteSeer', 'Pubmed']
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', dataset)
@@ -28,16 +28,16 @@ def _get_sampler(batch_size, supervised, num_negatives, num_workers, dataset):
     test_size = sum(data.test_mask).item()
     if first:
         print({"train_size": train_size, "test_size": test_size})
-        print("Select the test dataset for iteration")
+        print("Select the train dataset for iteration")
         first = False
     sampler_kwargs = dict(
         edge_index=data.edge_index, batch_size=batch_size,
         sizes=[25, 10], shuffle=True, return_e_id=False,
-        num_nodes=data.num_nodes, node_idx=data.test_mask,
+        num_nodes=data.num_nodes, node_idx=data.train_mask,
         num_workers=cpu_count() * 3 // 4 if num_workers == 0 else num_workers,
     )
     if not supervised:
-        sampler_kwargs.update({"num_negatives": num_negatives})
+        sampler_kwargs.update({"num_negatives": num_negatives, "cache": cache})
     if supervised:
         sampler = RawNeighborSampler(**sampler_kwargs)
     else:
@@ -58,7 +58,10 @@ def main(batch_size=32, supervised=True, num_negatives=5, num_workers=8, dataset
     strip = "=" * 100
     print(f"{strip}\n\tTest01 - init sampler\n{strip}")
     # timeit(_get_sampler, **config)
+    start = time.time()
     sampler = _get_sampler(**config)
+    elapsed = time.time() - start
+    print(f"Load {sampler} takse {elapsed} [sec]")
     if iteration:
         print(f"{strip}\n\tTest02 - iteration of sampler\n{strip}")
         number = 3
@@ -70,7 +73,7 @@ def main(batch_size=32, supervised=True, num_negatives=5, num_workers=8, dataset
     if not supervised:
         number = 3
         start = time.time()
-        timeit(sampler.reset_negatives, sampler.edge_index)
+        timeit(sampler.reset_negatives)
         elapsed = time.time() - start
         average = elapsed / float(number)
         print(f"Average negative sampling time for an iteration: {average:.6f} [sec]")
