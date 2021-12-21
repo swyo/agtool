@@ -1,4 +1,8 @@
+import pickle
+from tqdm import tqdm
+from time import time
 from os import cpu_count
+from os.path import exists
 from itertools import islice
 
 import torch
@@ -23,17 +27,17 @@ def _chunk(it, size):
 
 
 class NeighborSampler(RawNeighborSampler):
-    def __init__(self, edge_index, *args, num_negatives=None, **kwargs):
+    def __init__(self, edge_index, *args, num_negatives=None, cache=False, **kwargs):
         super(NeighborSampler, self).__init__(edge_index, *args, **kwargs)
         if num_negatives:
             self.num_negatives = num_negatives
-            self.reset_negatives(edge_index)
+            self.cache = cache
+            self.reset_negatives('./cache/negatives' if cache else None)
 
     def sample(self, batch):
         batch = torch.tensor(batch)
-        row, col, _ = self.adj_t.coo()
-        # For each node in `batch`, we sample a direct neighbor (as positive
-        # example) and a random node (as negative example):
+        # For each node in `batch`, we sample a direct neighbor (as positive example) and a random node (as negative example):
+        row, col, _ = self.adj_t[batch].coo()
         pos_batch = random_walk(row, col, batch, walk_length=1, coalesced=False)[:, 1]
         neg_batch = self.neg_samples[batch].view(-1)
         batch = torch.cat([batch, pos_batch, neg_batch], dim=0)
@@ -42,7 +46,11 @@ class NeighborSampler(RawNeighborSampler):
         _batch_size = _batch_size // (self.num_negatives + 2)
         return _batch_size, n_id, adjs
 
-    def reset_negatives(self, edge_index):
+    def reset_negatives(self, cache_fname=None):
+        if self.cache and exists(cache_fname):
+            with open(cache_fname, 'rb') as fin:
+                self.neg_samples = pickle.load(fin)
+            return
         indptr, indices, _ = self.adj_t.csr()
         indptr, indices = indptr.numpy().astype(np.int32), indices.numpy().astype(np.int32)
         num_workers = cpu_count() * 3 // 4 if self.num_workers == 0 else self.num_workers
@@ -54,6 +62,9 @@ class NeighborSampler(RawNeighborSampler):
             min(num_workers, 16)
         )
         self.neg_samples = torch.tensor(cols, dtype=torch.int64).view(-1, self.num_negatives)
+        if self.cache and not exists(cache_fname):
+            with open(cache_fname, 'wb') as fout:
+                pickle.dump(self.neg_samples, fout)
 
 
 class GraphSAGE(PytorchModelBase):
@@ -63,9 +74,9 @@ class GraphSAGE(PytorchModelBase):
         self.supervised = False
         self.hidden_channels = hidden_channels
         self.convs = nn.ModuleList()
-        for i in range(num_layers):
-            in_channels = in_channels if i == 0 else hidden_channels
-            self.convs.append(SAGEConv(in_channels, hidden_channels))
+        self.convs.append(SAGEConv(in_channels, hidden_channels * 2))
+        self.convs.append(SAGEConv(hidden_channels * 2, hidden_channels))
+        assert len(self.convs) == num_layers
 
     def to_supervised(self, num_classes):
         self.supervised = True
@@ -95,13 +106,11 @@ class GraphSAGE(PytorchModelBase):
         return x
 
     def fit(self, data, epochs=100, batch_size=128, lr=5e-3, weight_decay=5e-4, device='cpu', num_workers=0, save_fname='grapsage.pt', num_negatives=5):
-        from tqdm import tqdm
         from torch import optim, device as torch_device
         device = device if isinstance(device, str) else torch_device(device)
         best_acc = 0
         self.best_clf = None
         self = self.to(device)
-        data = data.to(device)
         optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay)
         sampler_kwargs = dict(
             edge_index=data.edge_index, batch_size=batch_size,
@@ -109,10 +118,12 @@ class GraphSAGE(PytorchModelBase):
             num_nodes=data.num_nodes, node_idx=data.train_mask,
             num_workers=cpu_count() * 3 // 4 if num_workers == 0 else num_workers
         )
+        start = time()
         if self.supervised:
             sampler = RawNeighborSampler(**sampler_kwargs)
         else:
-            sampler = NeighborSampler(num_negatives=num_negatives, **sampler_kwargs)
+            sampler = NeighborSampler(num_negatives=num_negatives, cache=True, **sampler_kwargs)
+        print(f"{sampler}: Elapsed time is {time() - start:.6f} [sec]")
         pbar = tqdm(range(epochs), 'Train', position=0, ncols=150)
         for epoch in pbar:
             if self.supervised:
@@ -152,8 +163,7 @@ class GraphSAGE(PytorchModelBase):
                 embeddings = torch.cat(embeddings, dim=0)
                 self.clf = self.fit_classifier(embeddings, labels)
                 acc = self.clf.score(embeddings, labels)
-                if epoch > 0:
-                    sampler.reset_negatives(data.edge_index)
+                sampler.reset_negatives(f'./cache/negatives-{epoch}')
             val_acc = self.test(data, (batch_size + 1) // 2, valid=True, device=device, verbose=False, num_workers=num_workers)
             if val_acc > best_acc:
                 if not self.supervised:
@@ -163,7 +173,6 @@ class GraphSAGE(PytorchModelBase):
             pbar.set_postfix({'Acc(val)': f'{val_acc:.4f}[<={best_acc:.4f}]', 'Acc(train)': acc, 'Loss': loss.item()})
 
     def test(self, data, batch_size=128, device='cpu', num_workers=0, valid=False, verbose=True):
-        from tqdm import tqdm
         from torch import device as torch_device
         device = device if isinstance(device, str) else torch_device(device)
         self = self.to(device)
@@ -219,10 +228,10 @@ class GraphSAGE(PytorchModelBase):
             return acc
         print(f'\rTest Accuracy (full): {acc}')
 
-    def fit_classifier(self, x, y, batch_size=64, epochs=400):
+    def fit_classifier(self, x, y, batch_size=8192, epochs=100):
         clf = SGDClassifier()
         classes = np.unique(y)
-        for _ in range(epochs):
+        for _ in tqdm(range(epochs), 'fit_classifier', ncols=150, position=1, leave=False):
             _range = np.arange(len(y))
             np.random.shuffle(_range)
             for indices in _chunk(_range, batch_size):
@@ -241,14 +250,14 @@ def main(dataset='Cora', epochs=100, batch_size=128, lr=5e-3, weight_decay=5e-4,
     else:
         dataset = Planetoid(path, 'Cora', transform=T.NormalizeFeatures())
     data = dataset[0]
-    _model = GraphSAGE(dataset.num_features, 256 if supervised else 128)
+    _model = GraphSAGE(dataset.num_features, 256 if supervised else 256)
     if supervised:
         _model.to_supervised(dataset.num_classes)
     print(_model)
     _model.fit(data, epochs, batch_size, lr, weight_decay, device=device, num_workers=num_workers, save_fname='graphsage.pt', num_negatives=num_negatives)
     _model.from_pretrained('graphsage.pt')
     _model.test(data, batch_size=(batch_size + 1) // 2, device=device, num_workers=num_workers)
-    _model.test_full(data)
+    # _model.test_full(data)
 
 
 if __name__ == '__main__':
